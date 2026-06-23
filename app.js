@@ -18,7 +18,16 @@ const waitlistRoutes = require('./routes/waitlistRoutes');
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://ai-twin-63zh.vercel.app",
+      "https://twinn.live",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use('/api', waitlistRoutes);
