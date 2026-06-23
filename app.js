@@ -1,49 +1,92 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-const db = require("./config/db");
 
+const express = require("express");
+const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
+
+require("dotenv").config();
+
+const db = require("./config/db");
+const swaggerSpec = require("./swagger/swagger");
+const waitlistRoutes = require("./routes/waitlistRoutes");
+
+const app = express();
+
+/* =========================
+   Database Connection
+========================= */
 db.connect()
   .then(() => {
     console.log("✅ PostgreSQL Connected");
   })
   .catch((err) => {
-    console.error("❌ Database Error:", err.message);
+    console.error("❌ Database Error Full:", err);
   });
 
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./swagger/swagger');
+/* =========================
+   CORS Configuration
+========================= */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
 
-const waitlistRoutes = require('./routes/waitlistRoutes');
+  "https://twinn.live",
+  "https://www.twinn.live",
 
-const app = express();
+  // Vercel Frontend
+  "https://ai-twin-63zh.vercel.app",
+];
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://ai-twin-63zh.vercel.app",
-      "https://twinn.live",
-    ],
+    origin: function (origin, callback) {
+      // Allow Postman and server-to-server requests
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+/* =========================
+   Middleware
+========================= */
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', waitlistRoutes);
+/* =========================
+   Routes
+========================= */
+app.use("/api", waitlistRoutes);
 
+/* =========================
+   Swagger Docs
+========================= */
 app.use(
-    '/docs',
-    swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec)
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec)
 );
 
-app.get('/', (req,res)=>{
-    res.send('AI Twin Backend Running');
+/* =========================
+   Health Check
+========================= */
+app.get("/", (req, res) => {
+  res.send("AI Twin Backend Running 🚀");
 });
 
+/* =========================
+   Start Server
+========================= */
 const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, ()=>{
-    console.log(`Server Running on ${PORT}`);
+app.listen(PORT, () => {
+  console.log(🚀 Server Running on Port ${PORT});
 });
