@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 
-const apiKeyAuth = require("../middleware/apiKeyAuth");
-
 const {
   joinWaitlist,
-  getCount
+  getCount,
 } = require("../controllers/waitlistController");
 
-router.post("/waitlist", apiKeyAuth, joinWaitlist);
+// Public route - frontend can submit without API key
+router.post("/waitlist", joinWaitlist);
 
+// Count route
 router.get("/waitlist/count", getCount);
 
 module.exports = router;
