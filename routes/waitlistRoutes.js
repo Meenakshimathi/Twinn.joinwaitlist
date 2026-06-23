@@ -13,3 +13,4 @@ router.post("/waitlist", joinWaitlist);
 router.get("/waitlist/count", getCount);
 
 module.exports = router;
+// hi
